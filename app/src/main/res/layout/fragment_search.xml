@@ -19,22 +19,22 @@
 
 
     <TextView
-        android:text="Minimum Word Length"
+        android:text="Word Length"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textViewFilters"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:id="@+id/textViewMinWordLength"
+        android:id="@+id/textViewWordLength"
         android:textSize="14sp" />
 
     <SeekBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textViewMinWordLength"
+        android:layout_below="@+id/textViewWordLength"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/seekBarMinLength"
+        android:id="@+id/seekBarLength"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:max="25"
@@ -45,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textViewMinLength"
-        android:layout_below="@+id/seekBarMinLength"
+        android:layout_below="@+id/seekBarLength"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -60,69 +60,13 @@
         android:layout_below="@+id/editTextWord"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:text="Maximum Word Length"
+    <Button
+        android:text="Search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textViewMaxWordLength"
-        android:textSize="14sp"
-        android:layout_below="@+id/textViewMinLength"
-        android:layout_alignLeft="@+id/textViewMinWordLength"
-        android:layout_alignStart="@+id/textViewMinWordLength" />
-
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textViewMaxWordLength"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/seekBarMaxLength"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:max="25"
-        android:progress="0" />
-
-    <TextView
-        android:text="0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBarMaxLength"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/textViewMaxLength" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/editTextSuffix"
-        android:selectAllOnFocus="false"
-        android:layout_below="@+id/textViewEndsWith"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:text="Contains"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="11dp"
-        android:id="@+id/textViewContains"
-        android:layout_below="@+id/editTextSuffix"
-        android:layout_centerHorizontal="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/editTextContains"
-        android:selectAllOnFocus="false"
-        android:layout_below="@+id/textViewContains"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:id="@+id/btnSearch"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -131,7 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textViewStartsWith"
-        android:layout_below="@+id/textViewMaxLength"
+        android:layout_below="@+id/textViewMinLength"
         android:layout_centerHorizontal="true" />
 
     <EditText
@@ -151,18 +95,44 @@
         android:text="Ends With"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="11dp"
         android:id="@+id/textViewEndsWith"
         android:layout_below="@+id/editTextPrefix"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="23dp" />
 
-    <Button
-        android:text="Search"
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnSearch"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_alignParentTop="true"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/editTextSuffix"
+        android:selectAllOnFocus="false"
+        android:layout_below="@+id/textViewEndsWith"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/textViewMinLength"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Contains"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewContains"
+        android:layout_below="@+id/editTextSuffix"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/editTextContains"
+        android:selectAllOnFocus="false"
+        android:layout_below="@+id/textViewContains"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 

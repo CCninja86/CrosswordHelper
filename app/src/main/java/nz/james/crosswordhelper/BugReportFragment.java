@@ -7,21 +7,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TextView;
-
-import java.util.ArrayList;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ResultListFragment.OnFragmentInteractionListener} interface
+ * {@link BugReportFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ResultListFragment#newInstance} factory method to
+ * Use the {@link BugReportFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ResultListFragment extends android.support.v4.app.Fragment {
+public class BugReportFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -33,7 +29,7 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public ResultListFragment() {
+    public BugReportFragment() {
         // Required empty public constructor
     }
 
@@ -43,11 +39,11 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment ResultListFragment.
+     * @return A new instance of fragment BugReportFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ResultListFragment newInstance(String param1, String param2) {
-        ResultListFragment fragment = new ResultListFragment();
+    public static BugReportFragment newInstance(String param1, String param2) {
+        BugReportFragment fragment = new BugReportFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -68,21 +64,7 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_result_list, container, false);
-
-        Bundle bundle = getArguments();
-        ArrayList<String> results = bundle.getStringArrayList("Results");
-
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), results);
-        ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
-        listResults.setAdapter(adapter);
-
-        TextView textViewNumResults = (TextView) view.findViewById(R.id.textViewNumResults);
-        textViewNumResults.setText("Found " + results.size() + " results");
-
-
-
-        return view;
+        return inflater.inflate(R.layout.fragment_bug_report, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

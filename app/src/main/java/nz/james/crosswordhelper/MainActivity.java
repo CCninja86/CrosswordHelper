@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,7 +51,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class MainActivity extends AppCompatActivity implements ResultListFragment.OnFragmentInteractionListener, SearchFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements ResultListFragment.OnFragmentInteractionListener, SearchFragment.OnFragmentInteractionListener, HelpFeedbackFragment.OnFragmentInteractionListener, BugReportFragment.OnFragmentInteractionListener {
 
 
     private FragmentTransaction transaction;
@@ -65,7 +68,37 @@ public class MainActivity extends AppCompatActivity implements ResultListFragmen
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()){
+            case R.id.itemHelpFeedback:
+                HelpFeedbackFragment helpFeedbackFragment = new HelpFeedbackFragment();
+                transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, helpFeedbackFragment);
+                transaction.commit();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(String option) {
+        switch (option){
+            case "Report Bug":
+                BugReportFragment bugReportFragment = new BugReportFragment();
+                transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, bugReportFragment);
+                transaction.commit();
+                break;
+        }
 
     }
 
@@ -81,5 +114,10 @@ public class MainActivity extends AppCompatActivity implements ResultListFragmen
         transaction.replace(R.id.container, resultListFragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

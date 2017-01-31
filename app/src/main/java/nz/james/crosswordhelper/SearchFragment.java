@@ -1,9 +1,7 @@
 package nz.james.crosswordhelper;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -49,11 +47,9 @@ public class SearchFragment extends android.support.v4.app.Fragment {
 
     ArrayList<String> synonyms = new ArrayList<>();
 
-    private SeekBar seekBarMinLength;
-    private SeekBar seekBarMaxLength;
+    private SeekBar seekBarLength;
 
-    private TextView textViewMinLength;
-    private TextView textViewMaxLength;
+    private TextView textViewLength;
 
     private EditText editTextWord;
     private EditText editTextPrefix;
@@ -97,11 +93,9 @@ public class SearchFragment extends android.support.v4.app.Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        seekBarMinLength = (SeekBar) view.findViewById(R.id.seekBarMinLength);
-        seekBarMaxLength = (SeekBar) view.findViewById(R.id.seekBarMaxLength);
+        seekBarLength = (SeekBar) view.findViewById(R.id.seekBarLength);
 
-        textViewMinLength = (TextView) view.findViewById(R.id.textViewMinLength);
-        textViewMaxLength = (TextView) view.findViewById(R.id.textViewMaxLength);
+        textViewLength = (TextView) view.findViewById(R.id.textViewMinLength);
 
         editTextWord = (EditText) view.findViewById(R.id.editTextWord);
         editTextPrefix = (EditText) view.findViewById(R.id.editTextPrefix);
@@ -110,27 +104,10 @@ public class SearchFragment extends android.support.v4.app.Fragment {
 
         Button btnSearch = (Button) view.findViewById(R.id.btnSearch);
 
-        seekBarMinLength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBarLength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textViewMinLength.setText(String.valueOf(progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        seekBarMaxLength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textViewMaxLength.setText(String.valueOf(progress));
+                textViewLength.setText(String.valueOf(progress));
             }
 
             @Override
@@ -147,13 +124,13 @@ public class SearchFragment extends android.support.v4.app.Fragment {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                synonyms.clear();
                 String wordToSearch = editTextWord.getText().toString();
-                int minWordLength = seekBarMinLength.getProgress();
-                int maxWordLength = seekBarMaxLength.getProgress();
+                int wordLength = seekBarLength.getProgress();
                 String prefix = editTextPrefix.getText().toString();
                 String suffix = editTextSuffix.getText().toString();
                 String contains = editTextContains.getText().toString();
-                GetSynonymsTask getSynonymsTask = new GetSynonymsTask(wordToSearch, minWordLength, maxWordLength, prefix, suffix, contains);
+                GetSynonymsTask getSynonymsTask = new GetSynonymsTask(wordToSearch, wordLength, prefix, suffix, contains);
                 getSynonymsTask.execute();
             }
         });
@@ -165,17 +142,15 @@ public class SearchFragment extends android.support.v4.app.Fragment {
     private class GetSynonymsTask extends AsyncTask<Void, Void, Void> {
 
         private String wordToSearch;
-        private int minWordLength;
-        private int maxWordLength;
+        private int wordLength;
         private String prefix;
         private String suffix;
         private String contains;
         private ProgressDialog progressDialog;
 
-        public GetSynonymsTask(String wordToSearch, int minWordLength, int maxWordLength, String prefix, String suffix, String contains){
+        public GetSynonymsTask(String wordToSearch, int wordLength, String prefix, String suffix, String contains){
             this.wordToSearch = wordToSearch;
-            this.minWordLength = minWordLength;
-            this.maxWordLength = maxWordLength;
+            this.wordLength = wordLength;
             this.prefix = prefix;
             this.suffix = suffix;
             this.contains = contains;
@@ -194,7 +169,7 @@ public class SearchFragment extends android.support.v4.app.Fragment {
         protected Void doInBackground(Void... params) {
             try {
                 if(wordToSearch.contains(" ")){
-                    wordToSearch = wordToSearch.replaceAll(" ", "%20");
+                    wordToSearch = wordToSearch.toLowerCase().replaceAll(" ", "%20");
                 }
 
                 URL url = new URL("http://www.thesaurus.com/browse/" + wordToSearch);
@@ -250,22 +225,13 @@ public class SearchFragment extends android.support.v4.app.Fragment {
 
                     for(String word : synonyms){
                         if(word.contains(this.contains) && word.startsWith(this.prefix) && word.endsWith(this.suffix)){
-                            if(this.minWordLength != 0 && this.maxWordLength != 0){
-                                if(word.length() >= this.minWordLength && word.length() <= this.maxWordLength){
+                            if(this.wordLength != 0){
+                                if(word.length() == this.wordLength){
                                     temp.add(word);
                                 }
-                            } else if(this.minWordLength != 0 && this.maxWordLength == 0){
-                                if(word.length() >= this.minWordLength){
-                                    temp.add(word);
-                                }
-                            } else if(this.minWordLength == 0 && this.maxWordLength != 0){
-                                if(word.length() <= this.maxWordLength){
-                                    temp.add(word);
-                                }
-                            } else if(this.minWordLength == 0 && this.maxWordLength == 0){
+                            } else {
                                 temp.add(word);
                             }
-
                         }
                     }
 

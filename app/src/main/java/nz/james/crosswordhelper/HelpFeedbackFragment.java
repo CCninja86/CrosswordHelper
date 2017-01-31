@@ -7,8 +7,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -16,12 +16,12 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ResultListFragment.OnFragmentInteractionListener} interface
+ * {@link HelpFeedbackFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ResultListFragment#newInstance} factory method to
+ * Use the {@link HelpFeedbackFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ResultListFragment extends android.support.v4.app.Fragment {
+public class HelpFeedbackFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -33,7 +33,7 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public ResultListFragment() {
+    public HelpFeedbackFragment() {
         // Required empty public constructor
     }
 
@@ -43,11 +43,11 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment ResultListFragment.
+     * @return A new instance of fragment HelpFeedbackFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ResultListFragment newInstance(String param1, String param2) {
-        ResultListFragment fragment = new ResultListFragment();
+    public static HelpFeedbackFragment newInstance(String param1, String param2) {
+        HelpFeedbackFragment fragment = new HelpFeedbackFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -68,29 +68,37 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_result_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_help_feedback, container, false);
 
-        Bundle bundle = getArguments();
-        ArrayList<String> results = bundle.getStringArrayList("Results");
+        ListView listViewOptions = (ListView) view.findViewById(R.id.listViewOptions);
 
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), results);
-        ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
-        listResults.setAdapter(adapter);
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Report a Bug");
 
-        TextView textViewNumResults = (TextView) view.findViewById(R.id.textViewNumResults);
-        textViewNumResults.setText("Found " + results.size() + " results");
+        ListViewAdapter adapter = new ListViewAdapter(getActivity(), options);
+        listViewOptions.setAdapter(adapter);
 
+        listViewOptions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch(position){
+                    case 0:
+                        mListener.onFragmentInteraction("Report Bug");
+                        break;
 
+                }
+            }
+        });
 
         return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    /*public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
-    }
+    }*/
 
     @Override
     public void onAttach(Context context) {
@@ -121,6 +129,6 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(String option);
     }
 }

@@ -1,0 +1,96 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="nz.james.crosswordhelper.BugReportFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <TextView
+        android:text="Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewSubject"
+        android:layout_alignBaseline="@+id/editTextSubject"
+        android:layout_alignBottom="@+id/editTextSubject"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="24sp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/editTextSubject"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textViewSubject"
+        android:layout_toRightOf="@+id/textViewSubject"
+        android:layout_marginLeft="25dp"
+        android:textAlignment="textStart"
+        android:gravity="start"
+        android:maxLines="1" />
+
+    <TextView
+        android:text="Description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2"
+        android:textSize="24sp"
+        android:layout_marginTop="46dp"
+        android:layout_below="@+id/editTextSubject"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/editTextDescription"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="14sp"
+        android:maxLines="8"/>
+
+    <RadioButton
+        android:text="High"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioButtonHigh"
+        android:layout_marginBottom="81dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <RadioButton
+        android:text="Low"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioButtonLow"
+        android:layout_above="@+id/radioButtonMedium"
+        android:layout_alignLeft="@+id/radioButtonMedium"
+        android:layout_alignStart="@+id/radioButtonMedium" />
+
+    <TextView
+        android:text="Priority"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3"
+        android:textSize="24sp"
+        android:layout_above="@+id/radioButtonLow"
+        android:layout_centerHorizontal="true" />
+
+    <RadioButton
+        android:text="Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioButtonMedium"
+        android:layout_above="@+id/radioButtonHigh"
+        android:layout_alignLeft="@+id/radioButtonHigh"
+        android:layout_alignStart="@+id/radioButtonHigh" />
+
+</RelativeLayout>

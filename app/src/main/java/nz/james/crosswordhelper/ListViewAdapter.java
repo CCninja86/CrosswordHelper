@@ -15,12 +15,12 @@ import java.util.ArrayList;
  * Created by james on 23/01/2017.
  */
 
-public class ResultListAdapter extends ArrayAdapter<String> {
+public class ListViewAdapter extends ArrayAdapter<String> {
 
     private ArrayList<String> words;
     private  ArrayList<Integer> selectedItems;
 
-    public ResultListAdapter(Activity context, ArrayList<String> words){
+    public ListViewAdapter(Activity context, ArrayList<String> words){
         super(context, R.layout.row, words);
         this.words = words;
         this.selectedItems = new ArrayList<>();
