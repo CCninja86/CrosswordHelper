@@ -1,12 +1,32 @@
 package nz.james.crosswordhelper;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+
+import org.w3c.dom.Text;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 /**
@@ -28,6 +48,8 @@ public class BugReportFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private String priority;
 
     public BugReportFragment() {
         // Required empty public constructor
@@ -64,7 +86,119 @@ public class BugReportFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bug_report, container, false);
+        View view = inflater.inflate(R.layout.fragment_bug_report, container, false);
+
+        final EditText editTextTitle = (EditText) view.findViewById(R.id.editTextSubject);
+        final EditText editTextDescription = (EditText) view.findViewById(R.id.editTextDescription);
+        RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radioGroupPriority);
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId){
+                    case R.id.radioButtonLow:
+                        setPriority("LOW");
+                        break;
+                    case R.id.radioButtonMedium:
+                        setPriority("MEDIUM");
+                        break;
+                    case R.id.radioButtonHigh:
+                        setPriority("HIGH");
+                        break;
+
+                }
+            }
+        });
+
+
+        Button btnSubmit = (Button) view.findViewById(R.id.btnSubmit);
+
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Will figure out Trello API later
+
+                /*TrelloCard trelloCard = new TrelloCard("[BUG]" + textViewTitle.getText().toString(), textViewDescription.getText().toString(), "bottom", null, "58904d9b0fff4d29dab1fe0e");
+                Gson gson = new Gson();
+                String json = gson.toJson(trelloCard);
+
+                TrelloAPITask trelloAPITask = new TrelloAPITask("https://api.trello.com/1/cards", "POST", "application/json", json);
+                trelloAPITask.execute();*/
+
+                // In the meantime, just send an email
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/html");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ccninja86developer@gmail.com"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "[BUG] [" + priority + "] " + editTextTitle.getText().toString());
+                intent.putExtra(Intent.EXTRA_TEXT, editTextDescription.getText().toString());
+                startActivity(Intent.createChooser(intent, "Send Email"));
+
+            }
+        });
+
+
+
+
+        return view;
+    }
+
+    private class TrelloAPITask extends AsyncTask<Void, Void, Void>{
+
+        String url;
+        String requestMethod;
+        String contentType;
+        String body;
+        ProgressDialog progressDialog;
+
+        public TrelloAPITask(String url, String requestMethod, String contentType, String body){
+            this.url = url;
+            this.requestMethod = requestMethod;
+            this.contentType = contentType;
+            this.body = body;
+        }
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(getContext());
+            progressDialog.setMessage("Submitting...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            HttpsURLConnection connection;
+
+            try {
+                URL connUrl = new URL(url);
+                connection = (HttpsURLConnection) connUrl.openConnection();
+                connection.setRequestMethod(requestMethod);
+                connection.addRequestProperty("Content-Type", contentType);
+                connection.setRequestProperty("Content-Length", body);
+                connection.getOutputStream().write(body.getBytes("UTF8"));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result){
+            if(progressDialog != null && progressDialog.isShowing()){
+                progressDialog.dismiss();
+                progressDialog = null;
+            }
+        }
+    }
+
+    private void setPriority(String priority){
+        this.priority = priority;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

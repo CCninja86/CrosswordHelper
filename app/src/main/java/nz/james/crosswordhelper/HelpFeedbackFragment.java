@@ -1,14 +1,12 @@
 package nz.james.crosswordhelper;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -76,7 +74,7 @@ public class HelpFeedbackFragment extends Fragment {
         ArrayList<String> options = new ArrayList<>();
         options.add("Report a Bug");
 
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), options);
+        ListViewAdapter adapter = new ListViewAdapter(getActivity(), options, R.layout.row_options);
         listViewOptions.setAdapter(adapter);
 
         listViewOptions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -91,14 +89,7 @@ public class HelpFeedbackFragment extends Fragment {
             }
         });
 
-        Button btnSubmit = (Button) view.findViewById(R.id.btnSubmit);
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                
-            }
-        });
 
         return view;
     }

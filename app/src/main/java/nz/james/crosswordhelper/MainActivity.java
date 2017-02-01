@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements ResultListFragmen
                 HelpFeedbackFragment helpFeedbackFragment = new HelpFeedbackFragment();
                 transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, helpFeedbackFragment);
+                transaction.addToBackStack(null);
                 transaction.commit();
                 return true;
             default:
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements ResultListFragmen
                 BugReportFragment bugReportFragment = new BugReportFragment();
                 transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, bugReportFragment);
+                transaction.addToBackStack(null);
                 transaction.commit();
                 break;
         }

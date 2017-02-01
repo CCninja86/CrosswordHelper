@@ -44,7 +44,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/btnSubmit"
         android:layout_alignRight="@+id/textViewPriority"
-        android:layout_alignEnd="@+id/textViewPriority">
+        android:layout_alignEnd="@+id/textViewPriority"
+        android:id="@+id/radioGroupPriority">
 
         <RadioButton
             android:text="Low"

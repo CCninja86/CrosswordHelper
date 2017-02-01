@@ -73,7 +73,7 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
         Bundle bundle = getArguments();
         ArrayList<String> results = bundle.getStringArrayList("Results");
 
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), results);
+        ListViewAdapter adapter = new ListViewAdapter(getActivity(), results, R.layout.row_result_list);
         ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
         listResults.setAdapter(adapter);
 
