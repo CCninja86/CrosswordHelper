@@ -16,15 +16,17 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.goebl.david.Webb;
 import com.google.gson.Gson;
-
 import org.w3c.dom.Text;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -116,14 +118,12 @@ public class BugReportFragment extends Fragment {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Will figure out Trello API later
+                // Still working on Trello API
 
-                /*TrelloCard trelloCard = new TrelloCard("[BUG]" + textViewTitle.getText().toString(), textViewDescription.getText().toString(), "bottom", null, "58904d9b0fff4d29dab1fe0e");
-                Gson gson = new Gson();
-                String json = gson.toJson(trelloCard);
-
-                TrelloAPITask trelloAPITask = new TrelloAPITask("https://api.trello.com/1/cards", "POST", "application/json", json);
-                trelloAPITask.execute();*/
+//                TrelloCard trelloCard = new TrelloCard("[BUG]" + editTextTitle.getText().toString(), editTextDescription.getText().toString(), "bottom", null, "58904d9b0fff4d29dab1fe0e");
+//
+//                TrelloAPITask trelloAPITask = new TrelloAPITask("https://api.trello.com/1/cards", trelloCard);
+//                trelloAPITask.execute();
 
                 // In the meantime, just send an email
 
@@ -146,16 +146,12 @@ public class BugReportFragment extends Fragment {
     private class TrelloAPITask extends AsyncTask<Void, Void, Void>{
 
         String url;
-        String requestMethod;
-        String contentType;
-        String body;
+        TrelloCard trelloCard;
         ProgressDialog progressDialog;
 
-        public TrelloAPITask(String url, String requestMethod, String contentType, String body){
+        public TrelloAPITask(String url, TrelloCard trelloCard){
             this.url = url;
-            this.requestMethod = requestMethod;
-            this.contentType = contentType;
-            this.body = body;
+            this.trelloCard = trelloCard;
         }
 
         @Override
@@ -170,20 +166,16 @@ public class BugReportFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... params) {
-            HttpsURLConnection connection;
+            Webb webb = Webb.create();
+            webb.post(url)
+                    .param("name", trelloCard.getName())
+                    .param("desc", trelloCard.getDesc())
+                    .param("pos", trelloCard.getPos())
+                    .param("due", trelloCard.getDue())
+                    .param("idList", trelloCard.getIdList())
+                    .ensureSuccess()
+                    .asVoid();
 
-            try {
-                URL connUrl = new URL(url);
-                connection = (HttpsURLConnection) connUrl.openConnection();
-                connection.setRequestMethod(requestMethod);
-                connection.addRequestProperty("Content-Type", contentType);
-                connection.setRequestProperty("Content-Length", body);
-                connection.getOutputStream().write(body.getBytes("UTF8"));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
             return null;
         }
