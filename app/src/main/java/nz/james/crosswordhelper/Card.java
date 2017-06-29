@@ -4,7 +4,7 @@ package nz.james.crosswordhelper;
  * Created by james on 1/02/2017.
  */
 
-public class TrelloCard {
+public class Card {
 
     private String name;
     private String desc;
@@ -12,12 +12,16 @@ public class TrelloCard {
     private String due;
     private String idList;
 
-    public TrelloCard(String name, String desc, String pos, String due, String idList){
+    public Card(String name, String desc, String pos, String due, String idList){
         this.name = name;
         this.desc = desc;
         this.pos = pos;
         this.due = due;
         this.idList = idList;
+    }
+
+    public Card(){
+
     }
 
 

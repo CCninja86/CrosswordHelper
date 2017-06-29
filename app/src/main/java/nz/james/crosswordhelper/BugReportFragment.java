@@ -2,33 +2,25 @@ package nz.james.crosswordhelper;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.goebl.david.Webb;
 import com.google.gson.Gson;
-import org.w3c.dom.Text;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
-import javax.net.ssl.HttpsURLConnection;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 
 /**
@@ -52,6 +44,16 @@ public class BugReportFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private String priority;
+    private String type;
+
+    private Context context;
+
+    private String apiKey = "d35c9d609f223f10342ada84752e789e";
+    private String apiToken = "81c7f58f5a45d9ff9480e51f2c0abbea7b2b683ce3760b43a6accb085b5a9ce2";
+
+    private ProgressDialog progressDialog;
+
+    private Gson gson;
 
     public BugReportFragment() {
         // Required empty public constructor
@@ -85,16 +87,20 @@ public class BugReportFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_bug_report, container, false);
 
+        this.context = getActivity();
+        this.gson = new Gson();
+
         final EditText editTextTitle = (EditText) view.findViewById(R.id.editTextSubject);
         final EditText editTextDescription = (EditText) view.findViewById(R.id.editTextDescription);
-        RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radioGroupPriority);
+        RadioGroup radioGroupPriority = (RadioGroup) view.findViewById(R.id.radioGroupPriority);
+        RadioGroup radioGroupType = (RadioGroup) view.findViewById(R.id.radioGroupType);
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        radioGroupPriority.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId){
@@ -112,28 +118,89 @@ public class BugReportFragment extends Fragment {
             }
         });
 
+        radioGroupType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                switch (checkedId){
+                    case R.id.radioButtonBug:
+                        setType("Bug");
+                        break;
+                    case R.id.radioButtonFeature:
+                        setType("Feature");
+                        break;
+                }
+            }
+        });
+
 
         Button btnSubmit = (Button) view.findViewById(R.id.btnSubmit);
 
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Still working on Trello API
+                // Add card to automated Trello board
+                progressDialog = new ProgressDialog(getActivity());
+                progressDialog.setMessage("Submitting...");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
 
-//                TrelloCard trelloCard = new TrelloCard("[BUG]" + editTextTitle.getText().toString(), editTextDescription.getText().toString(), "bottom", null, "58904d9b0fff4d29dab1fe0e");
-//
-//                TrelloAPITask trelloAPITask = new TrelloAPITask("https://api.trello.com/1/cards", trelloCard);
-//                trelloAPITask.execute();
+                Ion.with(context)
+                        .load("https://api.trello.com/1/boards/nWL0de1l/lists?key=" + apiKey + "&token=" + apiToken)
+                        .as(new TypeToken<List[]>(){})
+                        .setCallback(new FutureCallback<List[]>() {
+                            @Override
+                            public void onCompleted(Exception e, List[] lists) {
+                                String listID = "";
 
-                // In the meantime, just send an email
+                                for(List list : lists){
+                                    if(list.getName().equals("To Do")){
+                                        listID = list.getId();
+                                        break;
+                                    }
+                                }
 
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/html");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ccninja86developer@gmail.com"});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "[BUG] [" + priority + "] " + editTextTitle.getText().toString());
-                intent.putExtra(Intent.EXTRA_TEXT, editTextDescription.getText().toString());
-                startActivity(Intent.createChooser(intent, "Send Email"));
+                                if(listID != null && !listID.equals("")){
+                                    Card card = new Card();
 
+                                    card.setName("[" + type + "] " + "[" + priority + "] " + editTextTitle.getText().toString());
+                                    card.setDesc(editTextDescription.getText().toString());
+                                    card.setIdList(listID);
+                                    card.setPos("top");
+                                    card.setDue(null);
+
+                                    JsonObject jsonObject = new JsonObject();
+                                    jsonObject.addProperty("name", card.getName());
+                                    jsonObject.addProperty("desc", card.getDesc());
+                                    jsonObject.addProperty("idList", card.getIdList());
+                                    jsonObject.addProperty("pos", card.getPos());
+                                    jsonObject.addProperty("due", card.getDue());
+
+                                    Ion.with(context)
+                                            .load("https://api.trello.com/1/cards?key=" + apiKey + "&token=" + apiToken)
+                                            .setJsonObjectBody(jsonObject)
+                                            .asString()
+                                            .setCallback(new FutureCallback<String>() {
+                                                @Override
+                                                public void onCompleted(Exception e, String result) {
+                                                    if(progressDialog != null && progressDialog.isShowing()){
+                                                        progressDialog.dismiss();
+                                                        progressDialog = null;
+                                                    }
+
+                                                    if(result.contains("error")){
+                                                        Toast.makeText(getActivity(), "Failed to submit report/request", Toast.LENGTH_LONG).show();
+                                                    } else {
+                                                        Toast.makeText(getActivity(), "Report/Request Submitted", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                }
+
+
+                            }
+                        });
             }
         });
 
@@ -146,12 +213,12 @@ public class BugReportFragment extends Fragment {
     private class TrelloAPITask extends AsyncTask<Void, Void, Void>{
 
         String url;
-        TrelloCard trelloCard;
+        Card card;
         ProgressDialog progressDialog;
 
-        public TrelloAPITask(String url, TrelloCard trelloCard){
+        public TrelloAPITask(String url, Card card){
             this.url = url;
-            this.trelloCard = trelloCard;
+            this.card = card;
         }
 
         @Override
@@ -168,11 +235,11 @@ public class BugReportFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             Webb webb = Webb.create();
             webb.post(url)
-                    .param("name", trelloCard.getName())
-                    .param("desc", trelloCard.getDesc())
-                    .param("pos", trelloCard.getPos())
-                    .param("due", trelloCard.getDue())
-                    .param("idList", trelloCard.getIdList())
+                    .param("name", card.getName())
+                    .param("desc", card.getDesc())
+                    .param("pos", card.getPos())
+                    .param("due", card.getDue())
+                    .param("idList", card.getIdList())
                     .ensureSuccess()
                     .asVoid();
 
@@ -191,6 +258,10 @@ public class BugReportFragment extends Fragment {
 
     private void setPriority(String priority){
         this.priority = priority;
+    }
+
+    private void setType(String type){
+        this.type = type;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

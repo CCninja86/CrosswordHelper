@@ -4,9 +4,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,6 +35,10 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private ArrayList<String> searchResults;
+
+    private ListViewAdapter adapter;
 
     public ResultListFragment() {
         // Required empty public constructor
@@ -71,14 +78,43 @@ public class ResultListFragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.fragment_result_list, container, false);
 
         Bundle bundle = getArguments();
-        ArrayList<String> results = bundle.getStringArrayList("Results");
+        searchResults = bundle.getStringArrayList("Results");
 
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), results, R.layout.row_result_list);
-        ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
+        adapter = new ListViewAdapter(getActivity(), searchResults, R.layout.row_result_list);
+        final ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
         listResults.setAdapter(adapter);
 
-        TextView textViewNumResults = (TextView) view.findViewById(R.id.textViewNumResults);
-        textViewNumResults.setText("Found " + results.size() + " results");
+        final TextView textViewNumResults = (TextView) view.findViewById(R.id.textViewNumResults);
+        textViewNumResults.setText("Found " + searchResults.size() + " results");
+
+        final EditText editTextSearch = (EditText) view.findViewById(R.id.editTextSearch);
+        editTextSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String term = editTextSearch.getText().toString();
+                ArrayList<String> results = new ArrayList<>();
+
+                for(String word : searchResults){
+                    if(word.startsWith(term)){
+                        results.add(word);
+                    }
+                }
+
+                adapter = new ListViewAdapter(getActivity(), results, R.layout.row_result_list);
+                listResults.setAdapter(adapter);
+                textViewNumResults.setText("Found " + results.size() + " results");
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
 
 

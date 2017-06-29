@@ -72,7 +72,7 @@ public class HelpFeedbackFragment extends Fragment {
         ListView listViewOptions = (ListView) view.findViewById(R.id.listViewOptions);
 
         ArrayList<String> options = new ArrayList<>();
-        options.add("Report a Bug");
+        options.add("Report Bug/Request Feature");
 
         ListViewAdapter adapter = new ListViewAdapter(getActivity(), options, R.layout.row_options);
         listViewOptions.setAdapter(adapter);
@@ -82,7 +82,7 @@ public class HelpFeedbackFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch(position){
                     case 0:
-                        mListener.onFragmentInteraction("Report Bug");
+                        mListener.onFragmentInteraction("Bug/Feature");
                         break;
 
                 }
