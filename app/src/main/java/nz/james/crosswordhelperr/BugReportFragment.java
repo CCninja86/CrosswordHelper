@@ -43,8 +43,8 @@ public class BugReportFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private String priority;
-    private String type;
+    private String priority = "LOW";
+    private String type = "Bug";
 
     private Context context;
 
