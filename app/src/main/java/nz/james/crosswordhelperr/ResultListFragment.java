@@ -1,13 +1,17 @@
-package nz.james.crosswordhelper;
+package nz.james.crosswordhelperr;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -15,12 +19,12 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HelpFeedbackFragment.OnFragmentInteractionListener} interface
+ * {@link ResultListFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HelpFeedbackFragment#newInstance} factory method to
+ * Use the {@link ResultListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HelpFeedbackFragment extends Fragment {
+public class ResultListFragment extends android.support.v4.app.Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -32,7 +36,11 @@ public class HelpFeedbackFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public HelpFeedbackFragment() {
+    private ArrayList<String> searchResults;
+
+    private ListViewAdapter adapter;
+
+    public ResultListFragment() {
         // Required empty public constructor
     }
 
@@ -42,11 +50,11 @@ public class HelpFeedbackFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HelpFeedbackFragment.
+     * @return A new instance of fragment ResultListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HelpFeedbackFragment newInstance(String param1, String param2) {
-        HelpFeedbackFragment fragment = new HelpFeedbackFragment();
+    public static ResultListFragment newInstance(String param1, String param2) {
+        ResultListFragment fragment = new ResultListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -67,25 +75,44 @@ public class HelpFeedbackFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_help_feedback, container, false);
+        View view = inflater.inflate(R.layout.fragment_result_list, container, false);
 
-        ListView listViewOptions = (ListView) view.findViewById(R.id.listViewOptions);
+        Bundle bundle = getArguments();
+        searchResults = bundle.getStringArrayList("Results");
 
-        ArrayList<String> options = new ArrayList<>();
-        options.add("Report Bug/Request Feature");
+        adapter = new ListViewAdapter(getActivity(), searchResults, R.layout.row_result_list);
+        final ListView listResults = (ListView) view.findViewById(R.id.listViewResults);
+        listResults.setAdapter(adapter);
 
-        ListViewAdapter adapter = new ListViewAdapter(getActivity(), options, R.layout.row_options);
-        listViewOptions.setAdapter(adapter);
+        final TextView textViewNumResults = (TextView) view.findViewById(R.id.textViewNumResults);
+        textViewNumResults.setText("Found " + searchResults.size() + " results");
 
-        listViewOptions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        final EditText editTextSearch = (EditText) view.findViewById(R.id.editTextSearch);
+        editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch(position){
-                    case 0:
-                        mListener.onFragmentInteraction("Bug/Feature");
-                        break;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String term = editTextSearch.getText().toString();
+                ArrayList<String> results = new ArrayList<>();
+
+                for(String word : searchResults){
+                    if(word.startsWith(term)){
+                        results.add(word);
+                    }
                 }
+
+                adapter = new ListViewAdapter(getActivity(), results, R.layout.row_result_list);
+                listResults.setAdapter(adapter);
+                textViewNumResults.setText("Found " + results.size() + " results");
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -95,11 +122,11 @@ public class HelpFeedbackFragment extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    /*public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
-    }*/
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -130,6 +157,6 @@ public class HelpFeedbackFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(String option);
+        void onFragmentInteraction(Uri uri);
     }
 }

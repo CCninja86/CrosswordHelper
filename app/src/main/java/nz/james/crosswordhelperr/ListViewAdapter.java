@@ -1,4 +1,4 @@
-package nz.james.crosswordhelper;
+package nz.james.crosswordhelperr;
 
 import android.app.Activity;
 import android.content.Context;

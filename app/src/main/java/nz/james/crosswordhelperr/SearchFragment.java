@@ -1,4 +1,4 @@
-package nz.james.crosswordhelper;
+package nz.james.crosswordhelperr;
 
 import android.app.ProgressDialog;
 import android.content.Context;
