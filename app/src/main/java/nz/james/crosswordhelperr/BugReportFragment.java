@@ -138,69 +138,73 @@ public class BugReportFragment extends Fragment {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Add card to automated Trello board
-                progressDialog = new ProgressDialog(getActivity());
-                progressDialog.setMessage("Submitting...");
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
+                if(!editTextTitle.getText().toString().isEmpty() && !editTextDescription.getText().toString().isEmpty()){
+                    // Add card to automated Trello board
+                    progressDialog = new ProgressDialog(getActivity());
+                    progressDialog.setMessage("Submitting...");
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
 
-                Ion.with(context)
-                        .load("https://api.trello.com/1/boards/nWL0de1l/lists?key=" + apiKey + "&token=" + apiToken)
-                        .as(new TypeToken<List[]>(){})
-                        .setCallback(new FutureCallback<List[]>() {
-                            @Override
-                            public void onCompleted(Exception e, List[] lists) {
-                                String listID = "";
+                    Ion.with(context)
+                            .load("https://api.trello.com/1/boards/nWL0de1l/lists?key=" + apiKey + "&token=" + apiToken)
+                            .as(new TypeToken<List[]>(){})
+                            .setCallback(new FutureCallback<List[]>() {
+                                @Override
+                                public void onCompleted(Exception e, List[] lists) {
+                                    String listID = "";
 
-                                for(List list : lists){
-                                    if(list.getName().equals("To Do")){
-                                        listID = list.getId();
-                                        break;
+                                    for(List list : lists){
+                                        if(list.getName().equals("To Do")){
+                                            listID = list.getId();
+                                            break;
+                                        }
                                     }
-                                }
 
-                                if(listID != null && !listID.equals("")){
-                                    Card card = new Card();
+                                    if(listID != null && !listID.equals("")){
+                                        Card card = new Card();
 
-                                    card.setName("[" + type + "] " + "[" + priority + "] " + editTextTitle.getText().toString());
-                                    card.setDesc(editTextDescription.getText().toString());
-                                    card.setIdList(listID);
-                                    card.setPos("top");
-                                    card.setDue(null);
+                                        card.setName("[" + type + "] " + "[" + priority + "] " + editTextTitle.getText().toString());
+                                        card.setDesc(editTextDescription.getText().toString());
+                                        card.setIdList(listID);
+                                        card.setPos("top");
+                                        card.setDue(null);
 
-                                    JsonObject jsonObject = new JsonObject();
-                                    jsonObject.addProperty("name", card.getName());
-                                    jsonObject.addProperty("desc", card.getDesc());
-                                    jsonObject.addProperty("idList", card.getIdList());
-                                    jsonObject.addProperty("pos", card.getPos());
-                                    jsonObject.addProperty("due", card.getDue());
+                                        JsonObject jsonObject = new JsonObject();
+                                        jsonObject.addProperty("name", card.getName());
+                                        jsonObject.addProperty("desc", card.getDesc());
+                                        jsonObject.addProperty("idList", card.getIdList());
+                                        jsonObject.addProperty("pos", card.getPos());
+                                        jsonObject.addProperty("due", card.getDue());
 
-                                    Ion.with(context)
-                                            .load("https://api.trello.com/1/cards?key=" + apiKey + "&token=" + apiToken)
-                                            .setJsonObjectBody(jsonObject)
-                                            .asString()
-                                            .setCallback(new FutureCallback<String>() {
-                                                @Override
-                                                public void onCompleted(Exception e, String result) {
-                                                    if(progressDialog != null && progressDialog.isShowing()){
-                                                        progressDialog.dismiss();
-                                                        progressDialog = null;
+                                        Ion.with(context)
+                                                .load("https://api.trello.com/1/cards?key=" + apiKey + "&token=" + apiToken)
+                                                .setJsonObjectBody(jsonObject)
+                                                .asString()
+                                                .setCallback(new FutureCallback<String>() {
+                                                    @Override
+                                                    public void onCompleted(Exception e, String result) {
+                                                        if(progressDialog != null && progressDialog.isShowing()){
+                                                            progressDialog.dismiss();
+                                                            progressDialog = null;
+                                                        }
+
+                                                        if(result.contains("error")){
+                                                            Toast.makeText(getActivity(), "Failed to submit report/request", Toast.LENGTH_LONG).show();
+                                                        } else {
+                                                            Toast.makeText(getActivity(), "Report/Request Submitted", Toast.LENGTH_SHORT).show();
+                                                        }
                                                     }
+                                                });
+                                    }
 
-                                                    if(result.contains("error")){
-                                                        Toast.makeText(getActivity(), "Failed to submit report/request", Toast.LENGTH_LONG).show();
-                                                    } else {
-                                                        Toast.makeText(getActivity(), "Report/Request Submitted", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }
-                                            });
+
                                 }
-
-
-                            }
-                        });
+                            });
+                } else {
+                    Toast.makeText(getActivity(), "Please enter a Title and Description", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
