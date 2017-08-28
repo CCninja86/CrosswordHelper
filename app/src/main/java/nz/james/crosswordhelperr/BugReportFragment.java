@@ -44,7 +44,7 @@ public class BugReportFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private String priority = "LOW";
-    private String type = "Bug";
+    private String type = "BUG";
 
     private Context context;
 
@@ -123,10 +123,10 @@ public class BugReportFragment extends Fragment {
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId){
                     case R.id.radioButtonBug:
-                        setType("Bug");
+                        setType("BUG");
                         break;
                     case R.id.radioButtonFeature:
-                        setType("Feature");
+                        setType("FEATURE");
                         break;
                 }
             }
