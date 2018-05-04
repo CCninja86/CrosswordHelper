@@ -1,5 +1,6 @@
 package nz.james.crosswordhelperr;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -13,6 +14,10 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +38,7 @@ import java.util.Set;
  * Use the {@link SearchFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SearchFragment extends android.support.v4.app.Fragment {
+public class SearchFragment extends android.support.v4.app.Fragment implements DatamuseAPIResultsListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -55,6 +60,12 @@ public class SearchFragment extends android.support.v4.app.Fragment {
     private EditText editTextPrefix;
     private EditText editTextSuffix;
     private EditText editTextContains;
+
+
+    private ProgressDialog progressDialog;
+
+    private Context context;
+    private DatamuseAPIResultsListener datamuseAPIResultsListener;
 
     public SearchFragment() {
         // Required empty public constructor
@@ -92,7 +103,6 @@ public class SearchFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_search, container, false);
-
         seekBarLength = (SeekBar) view.findViewById(R.id.seekBarLength);
 
         textViewLength = (TextView) view.findViewById(R.id.textViewMinLength);
@@ -103,6 +113,9 @@ public class SearchFragment extends android.support.v4.app.Fragment {
         editTextContains = (EditText) view.findViewById(R.id.editTextContains);
 
         Button btnSearch = (Button) view.findViewById(R.id.btnSearch);
+
+        this.context = getActivity();
+        this.datamuseAPIResultsListener = this;
 
         seekBarLength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -133,10 +146,30 @@ public class SearchFragment extends android.support.v4.app.Fragment {
                 GetSynonymsTask getSynonymsTask = new GetSynonymsTask(wordToSearch, wordLength, prefix, suffix, contains);
                 getSynonymsTask.execute();
             }
+
         });
 
 
         return view;
+    }
+
+    @Override
+    public void onSynonymResults(ArrayList<String> synonyms) {
+        if(progressDialog != null && progressDialog.isShowing()){
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+
+        if(synonyms.size() > 0){
+            mListener.onFragmentInteraction(synonyms);
+        } else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "No Results Found", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private class GetSynonymsTask extends AsyncTask<Void, Void, Void> {
@@ -146,7 +179,6 @@ public class SearchFragment extends android.support.v4.app.Fragment {
         private String prefix;
         private String suffix;
         private String contains;
-        private ProgressDialog progressDialog;
 
         public GetSynonymsTask(String wordToSearch, int wordLength, String prefix, String suffix, String contains){
             this.wordToSearch = wordToSearch;
@@ -167,102 +199,108 @@ public class SearchFragment extends android.support.v4.app.Fragment {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
+            String searchUrl;
+            //try {
                 if(wordToSearch.contains(" ")){
                     wordToSearch = wordToSearch.toLowerCase().replaceAll(" ", "%20");
                 }
 
-                URL url = new URL("http://www.thesaurus.com/browse/" + wordToSearch);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 5.1.1; Vodafone Smart ultra 6"
-                        + " Build/LMY47V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91"
-                        + " Mobile Safari/537.36");
+                searchUrl = "https://api.datamuse.com/words?rel_syn=" + wordToSearch;
 
-                if(connection.getResponseCode() == 404){
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getContext(), "I could not find that word", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    String line;
-                    ArrayList<String> entries = new ArrayList<>();
+                Ion.with(context)
+                        .load(searchUrl)
+                        .as(new TypeToken<ArrayList<Synonym>>() {
+                        })
+                        .setCallback(new FutureCallback<ArrayList<Synonym>>() {
+                            @Override
+                            public void onCompleted(Exception e, ArrayList<Synonym> synonymList) {
+                                ArrayList<String> temp = new ArrayList<>();
 
-                    while((line = bufferedReader.readLine()) != null){
-                        System.out.println(line);
-                        if(line.contains("class=\"result synstart\"")){
-                            String[] list = line.split("<b>Synonyms:</b>");
-
-
-                            for(int i = 0; i < list.length; i++){
-                                if(i > 0){
-                                    String entry = list[i];
-                                    String newEntry = entry.trim().substring(0, entry.indexOf("</div>") - 1);
-                                    entries.add(newEntry);
+                                for(Synonym synonym : synonymList){
+                                    if(synonym.getWord().contains(contains) && synonym.getWord().startsWith(prefix) && synonym.getWord().endsWith(suffix)){
+                                        if(wordLength != 0){
+                                            if(synonym.getWord().length() == wordLength){
+                                                temp.add(synonym.getWord());
+                                            }
+                                        } else {
+                                            temp.add(synonym.getWord());
+                                        }
+                                    }
                                 }
+
+                                synonyms = temp;
+
+                                datamuseAPIResultsListener.onSynonymResults(synonyms);
                             }
-                        }
-                    }
+                        });
 
-                    for(String entry : entries){
-                        String[] synonymList = entry.split(", ");
+//                URL url = new URL("http://www.thesaurus.com/browse/" + wordToSearch);
+//                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 5.1.1; Vodafone Smart ultra 6"
+//                        + " Build/LMY47V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91"
+//                        + " Mobile Safari/537.36");
+//
+//                if(connection.getResponseCode() == 404){
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(getContext(), "I could not find that word", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//                } else {
+//                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//                    String line;
+//                    ArrayList<String> entries = new ArrayList<>();
+//
+//                    while((line = bufferedReader.readLine()) != null){
+//                        System.out.println(line);
+//                        if(line.contains("class=\"result synstart\"")){
+//                            String[] list = line.split("<b>Synonyms:</b>");
+//
+//
+//                            for(int i = 0; i < list.length; i++){
+//                                if(i > 0){
+//                                    String entry = list[i];
+//                                    String newEntry = entry.trim().substring(0, entry.indexOf("</div>") - 1);
+//                                    entries.add(newEntry);
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//                    for(String entry : entries){
+//                        String[] synonymList = entry.split(", ");
+//
+//                        for(String synonym : synonymList){
+//                            synonyms.add(synonym);
+//                        }
+//                    }
+//
+//                    // Remove any potential duplicate entries from ArrayList
+//                    Set<String> hashSet = new HashSet<>();
+//                    hashSet.addAll(synonyms);
+//                    synonyms.clear();
+//                    synonyms.addAll(hashSet);
+//                    hashSet = null;
+//
+//
+//
 
-                        for(String synonym : synonymList){
-                            synonyms.add(synonym);
-                        }
-                    }
-
-                    // Remove any potential duplicate entries from ArrayList
-                    Set<String> hashSet = new HashSet<>();
-                    hashSet.addAll(synonyms);
-                    synonyms.clear();
-                    synonyms.addAll(hashSet);
-                    hashSet = null;
-
-                    ArrayList<String> temp = new ArrayList<>();
-
-                    for(String word : synonyms){
-                        if(word.contains(this.contains) && word.startsWith(this.prefix) && word.endsWith(this.suffix)){
-                            if(this.wordLength != 0){
-                                if(word.length() == this.wordLength){
-                                    temp.add(word);
-                                }
-                            } else {
-                                temp.add(word);
-                            }
-                        }
-                    }
-
-                    synonyms = temp;
-                }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//
+//
+                //}
+//            } catch (MalformedURLException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result){
-            if(progressDialog != null && progressDialog.isShowing()){
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
 
-            if(synonyms.size() > 0){
-                mListener.onFragmentInteraction(synonyms);
-            } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getContext(), "No Results Found", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
 
         }
     }
