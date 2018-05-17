@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.goebl.david.Webb;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -212,52 +211,6 @@ public class BugReportFragment extends Fragment {
 
 
         return view;
-    }
-
-    private class TrelloAPITask extends AsyncTask<Void, Void, Void>{
-
-        String url;
-        Card card;
-        ProgressDialog progressDialog;
-
-        public TrelloAPITask(String url, Card card){
-            this.url = url;
-            this.card = card;
-        }
-
-        @Override
-        protected void onPreExecute(){
-            progressDialog = new ProgressDialog(getContext());
-            progressDialog.setMessage("Submitting...");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Webb webb = Webb.create();
-            webb.post(url)
-                    .param("name", card.getName())
-                    .param("desc", card.getDesc())
-                    .param("pos", card.getPos())
-                    .param("due", card.getDue())
-                    .param("idList", card.getIdList())
-                    .ensureSuccess()
-                    .asVoid();
-
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result){
-            if(progressDialog != null && progressDialog.isShowing()){
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
-        }
     }
 
     private void setPriority(String priority){
